@@ -460,7 +460,27 @@ install::__execute() {
     node::start
     install::__commit container_up
 
-    # 9. Print params
+    # 9. systemd timers (updates, blocklists, backup)
+    log_info "$(t install.timers_install)"
+    source "$NODER_HOME/modules/10_updates.sh"
+    source "$NODER_HOME/modules/11_blocklists.sh"
+    source "$NODER_HOME/modules/backup.sh"
+    updates::install_timer || true
+    blocklists::install_timer || true
+    backup::install_timer || true
+
+    # 10. Telegram daemon (if configured)
+    if install::__has tg_token; then
+        log_info "$(t install.tg_listener_start)"
+        python3 "$NODER_HOME/modules/09_telegram.py" setup || true
+    fi
+
+    # 11. Final health-check
+    log_info "$(t install.final_health)"
+    source "$NODER_HOME/modules/12_health.sh"
+    health::report || true
+
+    # 12. Print params
     install::__print_params
 }
 

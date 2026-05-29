@@ -100,6 +100,42 @@ main() {
             source "$NODER_HOME/modules/10_updates.sh"
             updates::run "$@"
             ;;
+        blocklists)
+            source "$NODER_HOME/modules/11_blocklists.sh"
+            case "${1:-update}" in
+                update|"")        blocklists::update_all ;;
+                routing)          blocklists::update_routing ;;
+                firewall)         blocklists::update_firewall ;;
+                schedule)         blocklists::install_timer ;;
+                rollback)         blocklists::rollback ;;
+                show|sources)     blocklists::show_sources ;;
+                *) die "$(t cli.unknown_cmd): blocklists $1" ;;
+            esac
+            ;;
+        kernel)
+            source "$NODER_HOME/modules/14_kernel.sh"
+            case "${1:-status}" in
+                install|xanmod)   kernel::install_xanmod ;;
+                sysctl)           kernel::apply_sysctl ;;
+                status|"")        kernel::status ;;
+                revert)           kernel::revert_sysctl ;;
+                *) die "$(t cli.unknown_cmd): kernel $1" ;;
+            esac
+            ;;
+        firewall|fw)
+            source "$NODER_HOME/modules/08_firewall.sh"
+            case "${1:-apply}" in
+                apply|"")         firewall::apply ;;
+                status)           firewall::status ;;
+                strict)           firewall::set_strict_mode "${2:-on}" ;;
+                fail2ban|f2b)     firewall::install_fail2ban ;;
+                *) die "$(t cli.unknown_cmd): firewall $1" ;;
+            esac
+            ;;
+        health)
+            source "$NODER_HOME/modules/12_health.sh"
+            health::report
+            ;;
         uninstall)
             source "$NODER_HOME/modules/uninstall.sh"
             uninstall::run "$@"
@@ -107,6 +143,16 @@ main() {
         backup)
             source "$NODER_HOME/modules/backup.sh"
             backup::run "$@"
+            ;;
+        ssh)
+            source "$NODER_HOME/modules/ssh_harden.sh"
+            ssh::run "$@"
+            ;;
+        tg|telegram)
+            python3 "$NODER_HOME/modules/09_telegram.py" "$@"
+            ;;
+        api|panel-api)
+            python3 "$NODER_HOME/modules/panel_api.py" "$@"
             ;;
         version|--version|-v)
             echo "noder $NODER_VERSION — by popokole"

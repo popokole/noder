@@ -18,6 +18,7 @@ readonly REQUIRED_PACKAGES=(
     jq
     python3
     python3-venv
+    python3-cryptography
     nftables
     fail2ban
     logrotate
@@ -26,6 +27,7 @@ readonly REQUIRED_PACKAGES=(
     openssl
     tar
     coreutils
+    rsync
 )
 
 preflight::detect_arch() {
