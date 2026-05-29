@@ -143,7 +143,7 @@ flush ruleset
 table inet noder {
 
     # ------------------------------------------------------------------
-    # Auto-expiring blocklists — dynamic so rules can `add @set { ... }`
+    # Auto-expiring blocklists — dynamic so rules can 'add @set { ... }'
     # ------------------------------------------------------------------
     set scanners4 { type ipv4_addr; flags dynamic, timeout; size 65535; timeout 24h; }
     set scanners6 { type ipv6_addr; flags dynamic, timeout; size 65535; timeout 24h; }
