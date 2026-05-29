@@ -100,13 +100,14 @@ menu::install() {
 
 menu::control() {
     while true; do
-        ui::clear
-        ui::header "$(t menu.control.title)"
-        printf '  [1] %s\n' "$(t menu.control.start)"
-        printf '  [2] %s\n' "$(t menu.control.stop)"
-        printf '  [3] %s\n' "$(t menu.control.restart)"
-        printf '  [4] %s\n' "$(t menu.control.recreate)"
-        printf '  [0] %s\n' "$(t ui.back)"
+        ui::banner
+        ui::section "$(t menu.control.title)"
+        ui::menu_item 1 "$(t menu.control.start)"    ok
+        ui::menu_item 2 "$(t menu.control.stop)"     warn
+        ui::menu_item 3 "$(t menu.control.restart)"
+        ui::menu_item 4 "$(t menu.control.recreate)" accent
+        echo
+        ui::menu_item 0 "$(t ui.back)" back
         ui::footer
         local c; ui::prompt c "$(t ui.choose_option)"
         case "$c" in
@@ -129,15 +130,16 @@ menu::health() {
 
 menu::logs() {
     while true; do
-        ui::clear
-        ui::header "$(t menu.logs.title)"
-        printf '  [1] %s\n' "$(t menu.logs.xray_tail)"
-        printf '  [2] %s\n' "$(t menu.logs.xray_follow)"
-        printf '  [3] %s\n' "$(t menu.logs.container)"
-        printf '  [4] %s\n' "$(t menu.logs.noder)"
-        printf '  [5] %s\n' "$(t menu.logs.fail2ban)"
-        printf '  [6] %s\n' "$(t menu.logs.tg)"
-        printf '  [0] %s\n' "$(t ui.back)"
+        ui::banner
+        ui::section "$(t menu.logs.title)"
+        ui::menu_item 1 "$(t menu.logs.xray_tail)"
+        ui::menu_item 2 "$(t menu.logs.xray_follow)" accent
+        ui::menu_item 3 "$(t menu.logs.container)"
+        ui::menu_item 4 "$(t menu.logs.noder)"
+        ui::menu_item 5 "$(t menu.logs.fail2ban)"
+        ui::menu_item 6 "$(t menu.logs.tg)"
+        echo
+        ui::menu_item 0 "$(t ui.back)" back
         ui::footer
         local c; ui::prompt c "$(t ui.choose_option)"
         case "$c" in
@@ -155,14 +157,15 @@ menu::logs() {
 
 menu::updates() {
     while true; do
-        ui::clear
-        ui::header "$(t menu.updates.title)"
-        printf '  [1] %s\n' "$(t menu.updates.check)"
-        printf '  [2] %s\n' "$(t menu.updates.xray)"
-        printf '  [3] %s\n' "$(t menu.updates.image)"
-        printf '  [4] %s\n' "$(t menu.updates.rollback)"
-        printf '  [5] %s\n' "$(t menu.updates.schedule)"
-        printf '  [0] %s\n' "$(t ui.back)"
+        ui::banner
+        ui::section "$(t menu.updates.title)"
+        ui::menu_item 1 "$(t menu.updates.check)"    ok
+        ui::menu_item 2 "$(t menu.updates.xray)"     accent
+        ui::menu_item 3 "$(t menu.updates.image)"    accent
+        ui::menu_item 4 "$(t menu.updates.rollback)" warn
+        ui::menu_item 5 "$(t menu.updates.schedule)"
+        echo
+        ui::menu_item 0 "$(t ui.back)" back
         ui::footer
         local c; ui::prompt c "$(t ui.choose_option)"
         case "$c" in
@@ -179,14 +182,15 @@ menu::updates() {
 
 menu::regen() {
     while true; do
-        ui::clear
-        ui::header "$(t menu.regen.title)"
-        printf '  [1] %s\n' "$(t menu.regen.short_id)"
-        printf '  [2] %s\n' "$(t menu.regen.dest)"
-        printf '  [3] %s\n' "$(t menu.regen.port)"
-        printf '  [4] %s\n' "$(t menu.regen.full)"
-        printf '  [5] %s\n' "$(t menu.regen.rollback)"
-        printf '  [0] %s\n' "$(t ui.back)"
+        ui::banner
+        ui::section "$(t menu.regen.title)"
+        ui::menu_item 1 "$(t menu.regen.short_id)" ok
+        ui::menu_item 2 "$(t menu.regen.dest)"
+        ui::menu_item 3 "$(t menu.regen.port)"     warn
+        ui::menu_item 4 "$(t menu.regen.full)"     accent
+        ui::menu_item 5 "$(t menu.regen.rollback)" warn
+        echo
+        ui::menu_item 0 "$(t ui.back)" back
         ui::footer
         local c; ui::prompt c "$(t ui.choose_option)"
         case "$c" in
@@ -202,8 +206,8 @@ menu::regen() {
 }
 
 menu::show_config() {
-    ui::clear
-    ui::header "$(t menu.items.7)"
+    ui::banner
+    ui::section "$(t menu.items.7)"
     if ! state::exists; then
         log_warn "$(t menu.not_installed_hint)"
         ui::pause
@@ -223,15 +227,16 @@ menu::change_panel() {
 
 menu::blocklists() {
     while true; do
-        ui::clear
-        ui::header "$(t menu.geo.title)"
-        printf '  [1] %s\n' "$(t menu.geo.both)"
-        printf '  [2] %s\n' "$(t menu.geo.routing)"
-        printf '  [3] %s\n' "$(t menu.geo.firewall)"
-        printf '  [4] %s\n' "$(t menu.geo.sources_show)"
-        printf '  [5] %s\n' "$(t menu.geo.sources_edit)"
-        printf '  [6] %s\n' "$(t menu.geo.rollback)"
-        printf '  [0] %s\n' "$(t ui.back)"
+        ui::banner
+        ui::section "$(t menu.geo.title)"
+        ui::menu_item 1 "$(t menu.geo.both)"          ok
+        ui::menu_item 2 "$(t menu.geo.routing)"
+        ui::menu_item 3 "$(t menu.geo.firewall)"
+        ui::menu_item 4 "$(t menu.geo.sources_show)"
+        ui::menu_item 5 "$(t menu.geo.sources_edit)"  warn
+        ui::menu_item 6 "$(t menu.geo.rollback)"      warn
+        echo
+        ui::menu_item 0 "$(t ui.back)" back
         ui::footer
         local c; ui::prompt c "$(t ui.choose_option)"
         case "$c" in
@@ -249,14 +254,15 @@ menu::blocklists() {
 
 menu::backup() {
     while true; do
-        ui::clear
-        ui::header "$(t menu.backup.title)"
-        printf '  [1] %s\n' "$(t menu.backup.create)"
-        printf '  [2] %s\n' "$(t menu.backup.restore_last)"
-        printf '  [3] %s\n' "$(t menu.backup.restore_choose)"
-        printf '  [4] %s\n' "$(t menu.backup.download)"
-        printf '  [5] %s\n' "$(t menu.backup.schedule)"
-        printf '  [0] %s\n' "$(t ui.back)"
+        ui::banner
+        ui::section "$(t menu.backup.title)"
+        ui::menu_item 1 "$(t menu.backup.create)"          ok
+        ui::menu_item 2 "$(t menu.backup.restore_last)"    warn
+        ui::menu_item 3 "$(t menu.backup.restore_choose)"  warn
+        ui::menu_item 4 "$(t menu.backup.download)"
+        ui::menu_item 5 "$(t menu.backup.schedule)"        accent
+        echo
+        ui::menu_item 0 "$(t ui.back)" back
         ui::footer
         local c; ui::prompt c "$(t ui.choose_option)"
         case "$c" in
@@ -273,16 +279,17 @@ menu::backup() {
 
 menu::telegram() {
     while true; do
-        ui::clear
-        ui::header "$(t menu.tg.title)"
-        printf '  [1] %s\n' "$(t menu.tg.enable)"
-        printf '  [2] %s\n' "$(t menu.tg.disable)"
-        printf '  [3] %s\n' "$(t menu.tg.change_token)"
-        printf '  [4] %s\n' "$(t menu.tg.change_chat)"
-        printf '  [5] %s\n' "$(t menu.tg.trusted)"
-        printf '  [6] %s\n' "$(t menu.tg.test)"
-        printf '  [7] %s\n' "$(t menu.tg.show)"
-        printf '  [0] %s\n' "$(t ui.back)"
+        ui::banner
+        ui::section "$(t menu.tg.title)"
+        ui::menu_item 1 "$(t menu.tg.enable)"        ok
+        ui::menu_item 2 "$(t menu.tg.disable)"       warn
+        ui::menu_item 3 "$(t menu.tg.change_token)"
+        ui::menu_item 4 "$(t menu.tg.change_chat)"
+        ui::menu_item 5 "$(t menu.tg.trusted)"       accent
+        ui::menu_item 6 "$(t menu.tg.test)"          ok
+        ui::menu_item 7 "$(t menu.tg.show)"
+        echo
+        ui::menu_item 0 "$(t ui.back)" back
         ui::footer
         local c; ui::prompt c "$(t ui.choose_option)"
         case "$c" in
@@ -301,13 +308,14 @@ menu::telegram() {
 
 menu::ssh() {
     while true; do
-        ui::clear
-        ui::header "$(t menu.ssh.title)"
-        printf '  [1] %s\n' "$(t menu.ssh.f2b)"
-        printf '  [2] %s\n' "$(t menu.ssh.port)"
-        printf '  [3] %s\n' "$(t menu.ssh.no_password)"
-        printf '  [4] %s\n' "$(t menu.ssh.show)"
-        printf '  [0] %s\n' "$(t ui.back)"
+        ui::banner
+        ui::section "$(t menu.ssh.title)"
+        ui::menu_item 1 "$(t menu.ssh.f2b)"          ok
+        ui::menu_item 2 "$(t menu.ssh.port)"         warn
+        ui::menu_item 3 "$(t menu.ssh.no_password)"  danger
+        ui::menu_item 4 "$(t menu.ssh.show)"
+        echo
+        ui::menu_item 0 "$(t ui.back)" back
         ui::footer
         local c; ui::prompt c "$(t ui.choose_option)"
         case "$c" in
@@ -323,16 +331,17 @@ menu::ssh() {
 
 menu::api() {
     while true; do
-        ui::clear
-        ui::header "$(t menu.api.title)"
-        printf '  [1] %s\n' "$(t menu.api.enable)"
-        printf '  [2] %s\n' "$(t menu.api.disable)"
-        printf '  [3] %s\n' "$(t menu.api.change)"
-        printf '  [4] %s\n' "$(t menu.api.test)"
-        printf '  [5] %s\n' "$(t menu.api.auto)"
-        printf '  [6] %s\n' "$(t menu.api.show)"
-        printf '  [7] %s\n' "$(t menu.api.wipe)"
-        printf '  [0] %s\n' "$(t ui.back)"
+        ui::banner
+        ui::section "$(t menu.api.title)"
+        ui::menu_item 1 "$(t menu.api.enable)"  warn
+        ui::menu_item 2 "$(t menu.api.disable)"
+        ui::menu_item 3 "$(t menu.api.change)"
+        ui::menu_item 4 "$(t menu.api.test)"    ok
+        ui::menu_item 5 "$(t menu.api.auto)"    accent
+        ui::menu_item 6 "$(t menu.api.show)"
+        ui::menu_item 7 "$(t menu.api.wipe)"    danger
+        echo
+        ui::menu_item 0 "$(t ui.back)" back
         ui::footer
         local c; ui::prompt c "$(t ui.choose_option)"
         case "$c" in
@@ -359,26 +368,27 @@ menu::uninstall() {
 menu::hardening() {
     # Объединённое меню «Ядро · BBRv3 · DDoS» — пункт 15.
     while true; do
-        ui::clear
-        ui::header "$(t menu.kernel.title)"
+        ui::banner
         if menu::__load_or_stub 14_kernel.sh kernel::status; then
             kernel::status
         fi
+
+        ui::section "Ядро · сетевой стек"
+        ui::menu_item 1 "$(t menu.kernel.install_xanmod)" accent
+        ui::menu_item 2 "$(t menu.kernel.apply_sysctl)"   ok
+        ui::menu_item 3 "$(t menu.kernel.status)"
+        ui::menu_item 4 "$(t menu.kernel.schedule_boot)"  warn
+        ui::menu_item 5 "$(t menu.kernel.revert)"         warn
+
+        ui::section "Firewall · DDoS"
+        ui::menu_item 6  "$(t menu.kernel.fw_apply)"      ok
+        ui::menu_item 7  "$(t menu.kernel.fw_strict_on)"  warn
+        ui::menu_item 8  "$(t menu.kernel.fw_strict_off)"
+        ui::menu_item 9  "$(t menu.kernel.fw_status)"
+        ui::menu_item 10 "$(t menu.kernel.fw_clear)"      warn
+        ui::menu_item 11 "$(t menu.kernel.fw_f2b)"        ok
         echo
-        printf '  ── Ядро ──\n'
-        printf '  [1] %s\n' "$(t menu.kernel.install_xanmod)"
-        printf '  [2] %s\n' "$(t menu.kernel.apply_sysctl)"
-        printf '  [3] %s\n' "$(t menu.kernel.status)"
-        printf '  [4] %s\n' "$(t menu.kernel.schedule_boot)"
-        printf '  [5] %s\n' "$(t menu.kernel.revert)"
-        printf '  ── Firewall · DDoS ──\n'
-        printf '  [6] %s\n' "$(t menu.kernel.fw_apply)"
-        printf '  [7] %s\n' "$(t menu.kernel.fw_strict_on)"
-        printf '  [8] %s\n' "$(t menu.kernel.fw_strict_off)"
-        printf '  [9] %s\n' "$(t menu.kernel.fw_status)"
-        printf ' [10] %s\n' "$(t menu.kernel.fw_clear)"
-        printf ' [11] %s\n' "$(t menu.kernel.fw_f2b)"
-        printf '  [ 0] %s\n' "$(t ui.back)"
+        ui::menu_item 0 "$(t ui.back)" back
         ui::footer
         local c; ui::prompt c "$(t ui.choose_option)"
         case "$c" in

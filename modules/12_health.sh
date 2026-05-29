@@ -158,8 +158,8 @@ PY
 # ---------------------------------------------------------------------------
 
 health::report() {
-    ui::clear
-    ui::header "$(t health.title)"
+    ui::banner
+    ui::section "$(t health.title)"
 
     if ! state::exists; then
         log_warn "$(t menu.not_installed_hint)"
