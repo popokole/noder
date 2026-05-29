@@ -29,12 +29,25 @@ install::__load_modules() {
 # ---------------------------------------------------------------------------
 # Shared install context (filled by CLI args + wizard)
 # ---------------------------------------------------------------------------
-declare -A INSTALL_CTX=()
-INSTALL_DONE=()
+# IMPORTANT: install.sh is `source`d from inside noder.sh's main() function.
+# Without `-g` declare would create a LOCAL associative array in main()'s
+# scope; nested function lookups would then mis-parse the key as arithmetic
+# and crash under `set -u` (e.g. "name: unbound variable").
+declare -gA INSTALL_CTX=()
+declare -ga INSTALL_DONE=()
 
-install::__set()  { INSTALL_CTX["$1"]="$2"; }
-install::__get()  { printf '%s' "${INSTALL_CTX[$1]:-}"; }
-install::__has()  { [ -n "${INSTALL_CTX[$1]:-}" ]; }
+install::__set() {
+    INSTALL_CTX["$1"]="$2"
+}
+install::__get() {
+    # `+x` form survives `set -u` even if the key is missing, on any bash ≥ 3.2.
+    if [ -n "${INSTALL_CTX[$1]+x}" ]; then
+        printf '%s' "${INSTALL_CTX[$1]}"
+    fi
+}
+install::__has() {
+    [ -n "${INSTALL_CTX[$1]+x}" ] && [ -n "${INSTALL_CTX[$1]}" ]
+}
 
 # Push a rollback step onto the stack.
 install::__commit() { INSTALL_DONE+=("$1"); }

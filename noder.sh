@@ -27,6 +27,29 @@ export NODER_LOCALE="${NODER_LOCALE:-ru}"
 source "$NODER_HOME/modules/00_common.sh"
 
 # ----------------------------------------------------------------------------
+# Eager-load all bash modules at TOP LEVEL.
+#
+# Why: bash's `source` runs in the *current* shell scope. When `source` is
+# executed inside a function, any `readonly X=...` / `declare -A X=...` at
+# the sourced file's top level becomes LOCAL to that function and vanishes
+# when control returns. That breaks every consumer that reads X later under
+# `set -u`. Sourcing at the script's top level keeps everything global.
+# `_LOADED` guards inside each module make repeat-sources no-ops, so later
+# `source` calls (from menu::__load_or_stub etc.) cost nothing.
+# ----------------------------------------------------------------------------
+for __m in \
+    01_preflight.sh 02_docker.sh 06_regen.sh 06_selfsteal.sh \
+    07_node.sh 08_firewall.sh 10_updates.sh 11_blocklists.sh \
+    12_health.sh 13_menu.sh 14_kernel.sh \
+    backup.sh install.sh ssh_harden.sh uninstall.sh; do
+    if [ -r "$NODER_HOME/modules/$__m" ]; then
+        # shellcheck disable=SC1090
+        source "$NODER_HOME/modules/$__m"
+    fi
+done
+unset __m
+
+# ----------------------------------------------------------------------------
 # Dispatch: CLI flags vs interactive menu
 # ----------------------------------------------------------------------------
 
