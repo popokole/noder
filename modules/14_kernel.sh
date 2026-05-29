@@ -217,16 +217,46 @@ EOF
 # XanMod installation
 # ---------------------------------------------------------------------------
 
+kernel::__probe_xanmod_repo() {
+    # Verify the repo actually serves a Release file. As of mid-2026 the
+    # deb.xanmod.org CDN intermittently returns 404 on everything; if so,
+    # we skip XanMod entirely instead of half-adding a broken apt source.
+    local url="http://deb.xanmod.org/dists/releases/Release"
+    local code
+    code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 "$url" || echo 0)"
+    if [ "$code" = "200" ]; then
+        return 0
+    fi
+    log_warn "XanMod репозиторий недоступен ($url → HTTP $code)"
+    return 1
+}
+
 kernel::__add_xanmod_repo() {
     if [ -f /etc/apt/sources.list.d/xanmod-release.list ]; then
         return 0
     fi
     install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://dl.xanmod.org/archive.key \
-        | gpg --dearmor -o /etc/apt/keyrings/xanmod-archive-keyring.gpg
+    if ! curl -fsSL --max-time 15 https://dl.xanmod.org/archive.key \
+            | gpg --dearmor -o /etc/apt/keyrings/xanmod-archive-keyring.gpg.tmp 2>/dev/null; then
+        rm -f /etc/apt/keyrings/xanmod-archive-keyring.gpg.tmp
+        log_warn "Не удалось скачать XanMod ключ — пропускаю репозиторий"
+        return 1
+    fi
+    mv /etc/apt/keyrings/xanmod-archive-keyring.gpg.tmp \
+       /etc/apt/keyrings/xanmod-archive-keyring.gpg
     echo "deb [signed-by=/etc/apt/keyrings/xanmod-archive-keyring.gpg] http://deb.xanmod.org releases main" \
         > /etc/apt/sources.list.d/xanmod-release.list
-    apt-get update -qq
+    # apt-get update -qq может вернуть 100 если репо отдаёт 404 на Release.
+    # Не валим установку — снимаем файл и сообщаем.
+    if ! apt-get update -qq -o Dir::Etc::sourcelist=sources.list.d/xanmod-release.list \
+            -o Dir::Etc::sourceparts=/dev/null -o APT::Get::List-Cleanup=0 2>/dev/null; then
+        log_warn "apt-get update для XanMod вернул ошибку — удаляю репозиторий"
+        rm -f /etc/apt/sources.list.d/xanmod-release.list
+        return 1
+    fi
+    # Полный update тоже на случай если первый refresh не подхватил
+    apt-get update -qq 2>/dev/null || true
+    return 0
 }
 
 kernel::__pick_xanmod_pkg() {
@@ -329,17 +359,30 @@ kernel::install_xanmod() {
         return 0
     fi
 
+    if ! kernel::__probe_xanmod_repo; then
+        log_warn "Пропускаю XanMod (репо недоступен), применяю sysctl + BBR(v1)"
+        kernel::apply_sysctl
+        return 0
+    fi
+
     local pkg
     pkg="$(kernel::__pick_xanmod_pkg)"
     log_info "Устанавливаю $pkg (микро-уровень CPU $(kernel::current_cpu_level))…"
 
-    kernel::__add_xanmod_repo
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get install -y -qq --no-install-recommends "$pkg" || {
-        log_warn "Не удалось установить $pkg. Откатываюсь на stock + BBR + sysctl."
+    if ! kernel::__add_xanmod_repo; then
+        log_warn "XanMod репо не добавлен, применяю только sysctl + BBR(v1)"
         kernel::apply_sysctl
         return 0
-    }
+    fi
+    export DEBIAN_FRONTEND=noninteractive
+    if ! apt-get install -y -qq --no-install-recommends "$pkg" 2>/dev/null; then
+        log_warn "Не удалось установить $pkg, применяю только sysctl + BBR(v1)"
+        # Repo больше не нужен (был добавлен временно)
+        rm -f /etc/apt/sources.list.d/xanmod-release.list
+        apt-get update -qq 2>/dev/null || true
+        kernel::apply_sysctl
+        return 0
+    fi
 
     log_ok "Установлено: $(kernel::__newest_installed_xanmod | xargs basename 2>/dev/null || echo "$pkg")"
     update-grub >/dev/null 2>&1 || true

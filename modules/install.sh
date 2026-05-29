@@ -475,10 +475,12 @@ install::__execute() {
     node::write_files "$(install::__get node_port)" "$(install::__get ssl_cert)"
     install::__commit compose_write
 
-    # 6. Kernel (optional)
+    # 6. Kernel (optional) — НИКОГДА не должен ронять установку
     if install::__has apply_kernel; then
         log_info "Применяю kernel-тюнинг + XanMod (если совместимо)"
-        kernel::run
+        if ! kernel::run; then
+            log_warn "kernel::run завершился с ошибкой — продолжаю установку без kernel-тюнинга"
+        fi
     fi
 
     # 7. Firewall
