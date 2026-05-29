@@ -75,12 +75,16 @@ firewall::__strict_mode() {
 # ---------------------------------------------------------------------------
 
 firewall::__render_config() {
+    # Все subshell-ы здесь дублируются с '|| echo ...' — под `set -Eeuo
+    # pipefail` любой 127/100/2 в `$(...)` пробрасывался в trap ERR (хоть
+    # nftables в итоге применялся успешно). Делаем функцию полностью
+    # идемпотентной: что бы ни вернули helper'ы — рендер не падает.
     local panel_ip ssh_port reality_port node_port strict
-    panel_ip="$(firewall::__panel_ip)"
-    ssh_port="$(firewall::__ssh_port)"
-    reality_port="$(firewall::__reality_port)"
-    node_port="$(firewall::__node_port)"
-    strict="$(firewall::__strict_mode)"
+    panel_ip="$(firewall::__panel_ip 2>/dev/null || echo "")"
+    ssh_port="$(firewall::__ssh_port 2>/dev/null || echo 22)"
+    reality_port="$(firewall::__reality_port 2>/dev/null || echo 443)"
+    node_port="$(firewall::__node_port 2>/dev/null || echo "")"
+    strict="$(firewall::__strict_mode 2>/dev/null || echo 0)"
 
     # Resolve panel host → IPv4 / IPv6 (if hostname given).
     local panel_v4="" panel_v6=""
@@ -89,8 +93,10 @@ firewall::__render_config() {
     elif [[ "$panel_ip" =~ : ]]; then
         panel_v6="$panel_ip"
     elif [ -n "$panel_ip" ]; then
-        panel_v4="$(getent ahostsv4 "$panel_ip" 2>/dev/null | awk '{print $1; exit}')"
-        panel_v6="$(getent ahostsv6 "$panel_ip" 2>/dev/null | awk '{print $1; exit}')"
+        # getent + awk под pipefail может вернуть != 0 даже при success
+        # (awk { exit } считается провалом для bash). Гасим через || true.
+        panel_v4="$(getent ahostsv4 "$panel_ip" 2>/dev/null | awk '{print $1; exit}' || true)"
+        panel_v6="$(getent ahostsv6 "$panel_ip" 2>/dev/null | awk '{print $1; exit}' || true)"
     fi
 
     # Public ports that are intentionally open — anything else is a scanner.
