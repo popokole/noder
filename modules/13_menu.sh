@@ -31,34 +31,35 @@ menu::__load_or_stub() {
 
 menu::main() {
     while true; do
-        ui::clear
-        ui::header "$(t menu.main_title)"
-        local installed=""
-        if state::exists; then
-            local name
-            name="$(state::get node_name)"
-            installed="${C_GREEN}● установлена${C_RESET} ${C_DIM}(${name})${C_RESET}"
-        else
-            installed="${C_YELLOW}○ не установлена${C_RESET}"
-        fi
-        printf '  Статус: %s\n\n' "$installed"
+        ui::banner
+        ui::status_line
+        echo
 
-        printf '  [%2d] %s\n' 1 "$(t menu.items.1)"
-        printf '  [%2d] %s\n' 2 "$(t menu.items.2)"
-        printf '  [%2d] %s\n' 3 "$(t menu.items.3)"
-        printf '  [%2d] %s\n' 4 "$(t menu.items.4)"
-        printf '  [%2d] %s\n' 5 "$(t menu.items.5)"
-        printf '  [%2d] %s\n' 6 "$(t menu.items.6)"
-        printf '  [%2d] %s\n' 7 "$(t menu.items.7)"
-        printf '  [%2d] %s\n' 8 "$(t menu.items.8)"
-        printf '  [%2d] %s\n' 9 "$(t menu.items.9)"
-        printf '  [%2d] %s\n' 10 "$(t menu.items.10)"
-        printf '  [%2d] %s\n' 11 "$(t menu.items.11)"
-        printf '  [%2d] %s\n' 12 "$(t menu.items.12)"
-        printf '  [%2d] %s\n' 13 "$(t menu.items.13)"
-        printf '  [%2d] %s\n' 14 "$(t menu.items.14)"
-        printf '  [%2d] %s\n' 15 "$(t menu.items.15)"
-        printf '  [%2d] %s\n' 0 "$(t menu.items.0)"
+        ui::section "Установка и управление"
+        ui::menu_item  1 "$(t menu.items.1)"  ok
+        ui::menu_item  2 "$(t menu.items.2)"
+        ui::menu_item  6 "$(t menu.items.6)"
+        ui::menu_item  8 "$(t menu.items.8)"
+        ui::menu_item 14 "$(t menu.items.14)" danger
+
+        ui::section "Мониторинг и диагностика"
+        ui::menu_item  3 "$(t menu.items.3)"
+        ui::menu_item  4 "$(t menu.items.4)"
+        ui::menu_item  7 "$(t menu.items.7)"
+
+        ui::section "Автоматизация"
+        ui::menu_item  5 "$(t menu.items.5)"
+        ui::menu_item  9 "$(t menu.items.9)"
+        ui::menu_item 10 "$(t menu.items.10)"
+
+        ui::section "Безопасность · ядро · бот"
+        ui::menu_item 11 "$(t menu.items.11)" accent
+        ui::menu_item 12 "$(t menu.items.12)"
+        ui::menu_item 13 "$(t menu.items.13)" accent
+        ui::menu_item 15 "$(t menu.items.15)" accent
+
+        echo
+        ui::menu_item  0 "$(t menu.items.0)" back
 
         ui::footer
         local choice

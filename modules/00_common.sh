@@ -13,16 +13,19 @@ __NODER_COMMON_LOADED=1
 # ----------------------------------------------------------------------------
 
 readonly NODER_WATERMARK="by popokole"
-readonly NODER_HEADER_TITLE="N O D E R  ·  Remnawave Node Manager"
+readonly NODER_HEADER_TITLE="Remnawave Node Manager"
 
 # ----------------------------------------------------------------------------
-# TTY / color detection
+# TTY / color detection (256-color where available, fallback to 8-color)
 # ----------------------------------------------------------------------------
 
 if [ -t 1 ] && [ "${NO_COLOR:-}" = "" ] && [ "${TERM:-dumb}" != "dumb" ]; then
     readonly C_RESET=$'\033[0m'
     readonly C_BOLD=$'\033[1m'
     readonly C_DIM=$'\033[2m'
+    readonly C_ITALIC=$'\033[3m'
+    readonly C_UNDER=$'\033[4m'
+
     readonly C_RED=$'\033[31m'
     readonly C_GREEN=$'\033[32m'
     readonly C_YELLOW=$'\033[33m'
@@ -30,9 +33,23 @@ if [ -t 1 ] && [ "${NO_COLOR:-}" = "" ] && [ "${TERM:-dumb}" != "dumb" ]; then
     readonly C_MAGENTA=$'\033[35m'
     readonly C_CYAN=$'\033[36m'
     readonly C_GRAY=$'\033[90m'
+
+    # 256-цветные оттенки для градиента баннера и акцентов
+    readonly C_AQUA=$'\033[38;5;87m'      # светло-голубой
+    readonly C_TEAL=$'\033[38;5;51m'      # бирюзовый
+    readonly C_AZURE=$'\033[38;5;39m'     # сине-голубой
+    readonly C_INDIGO=$'\033[38;5;63m'    # индиго
+    readonly C_VIOLET=$'\033[38;5;99m'    # фиолетовый
+    readonly C_PINK=$'\033[38;5;213m'     # розовый
+    readonly C_AMBER=$'\033[38;5;220m'    # янтарный
+    readonly C_LIME=$'\033[38;5;118m'     # лаймовый
+    readonly C_ROSE=$'\033[38;5;203m'     # коралловый
 else
-    readonly C_RESET="" C_BOLD="" C_DIM="" C_RED="" C_GREEN=""
-    readonly C_YELLOW="" C_BLUE="" C_MAGENTA="" C_CYAN="" C_GRAY=""
+    readonly C_RESET="" C_BOLD="" C_DIM="" C_ITALIC="" C_UNDER=""
+    readonly C_RED="" C_GREEN="" C_YELLOW="" C_BLUE="" C_MAGENTA=""
+    readonly C_CYAN="" C_GRAY=""
+    readonly C_AQUA="" C_TEAL="" C_AZURE="" C_INDIGO="" C_VIOLET=""
+    readonly C_PINK="" C_AMBER="" C_LIME="" C_ROSE=""
 fi
 
 # ----------------------------------------------------------------------------
@@ -74,12 +91,12 @@ __log_write() {
     fi
 }
 
-log_debug() { [ "${NODER_DEBUG:-0}" = "1" ] || return 0; __log_write DEBUG "$*"; echo "${C_GRAY}[debug]${C_RESET} $*" >&2; }
-log_info()  { __log_write INFO  "$*"; echo "${C_CYAN}[info]${C_RESET} $*"; }
-log_ok()    { __log_write INFO  "$*"; echo "${C_GREEN}[ok]${C_RESET} $*"; }
-log_warn()  { __log_write WARN  "$*"; echo "${C_YELLOW}[warn]${C_RESET} $*" >&2; }
-log_error() { __log_write ERROR "$*"; echo "${C_RED}[error]${C_RESET} $*" >&2; }
-log_crit()  { __log_write CRITICAL "$*"; echo "${C_RED}${C_BOLD}[CRIT]${C_RESET} $*" >&2; }
+log_debug() { [ "${NODER_DEBUG:-0}" = "1" ] || return 0; __log_write DEBUG "$*"; printf '  %s· debug%s  %s\n' "${C_DIM}${C_GRAY}" "$C_RESET" "$*" >&2; }
+log_info()  { __log_write INFO  "$*"; printf '  %s›%s %s\n' "${C_BOLD}${C_AZURE}" "$C_RESET" "$*"; }
+log_ok()    { __log_write INFO  "$*"; printf '  %s✓%s %s\n' "${C_BOLD}${C_LIME}"  "$C_RESET" "$*"; }
+log_warn()  { __log_write WARN  "$*"; printf '  %s⚠%s %s\n' "${C_BOLD}${C_AMBER}" "$C_RESET" "$*" >&2; }
+log_error() { __log_write ERROR "$*"; printf '  %s✗%s %s\n' "${C_BOLD}${C_ROSE}"  "$C_RESET" "$*" >&2; }
+log_crit()  { __log_write CRITICAL "$*"; printf '  %s‼ CRIT%s %s\n' "${C_BOLD}${C_ROSE}" "$C_RESET" "$*" >&2; }
 
 die() {
     log_error "$*"
@@ -136,21 +153,91 @@ ui::clear() {
     [ -t 1 ] && command -v clear >/dev/null 2>&1 && clear || true
 }
 
+# Большой ASCII-баннер с градиентом — для главного меню
+ui::banner() {
+    ui::clear
+    printf '\n'
+    printf '%s   ███╗   ██╗ ██████╗ ██████╗ ███████╗██████╗ %s\n' "${C_BOLD}${C_AQUA}" "$C_RESET"
+    printf '%s   ████╗  ██║██╔═══██╗██╔══██╗██╔════╝██╔══██╗%s\n' "${C_BOLD}${C_TEAL}" "$C_RESET"
+    printf '%s   ██╔██╗ ██║██║   ██║██║  ██║█████╗  ██████╔╝%s\n' "${C_BOLD}${C_AZURE}" "$C_RESET"
+    printf '%s   ██║╚██╗██║██║   ██║██║  ██║██╔══╝  ██╔══██╗%s\n' "${C_BOLD}${C_INDIGO}" "$C_RESET"
+    printf '%s   ██║ ╚████║╚██████╔╝██████╔╝███████╗██║  ██║%s\n' "${C_BOLD}${C_VIOLET}" "$C_RESET"
+    printf '%s   ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝%s\n' "${C_BOLD}${C_PINK}" "$C_RESET"
+    printf '%s         Remnawave Node Manager%s %s·%s %s%s%s\n\n' \
+        "$C_DIM" "$C_RESET" "${C_DIM}" "$C_RESET" "${C_ITALIC}${C_GRAY}" "$NODER_WATERMARK" "$C_RESET"
+}
+
+# Узкая шапка для подменю (без большого ASCII)
 ui::header() {
     local title="${1:-$NODER_HEADER_TITLE}"
-    local line="═══════════════════════════════════════════════"
-    printf '%s%s%s\n' "$C_BOLD$C_CYAN" "$line" "$C_RESET"
-    printf '%s   %s%s\n' "$C_BOLD" "$title" "$C_RESET"
-    printf '%s%53s%s\n' "$C_DIM" "$NODER_WATERMARK" "$C_RESET"
-    printf '%s%s%s\n\n' "$C_BOLD$C_CYAN" "$line" "$C_RESET"
+    ui::clear
+    printf '\n %s┌─%s %s %s─┐%s\n' \
+        "${C_BOLD}${C_AZURE}" "$C_RESET" \
+        "${C_BOLD}$title${C_RESET}" \
+        "${C_BOLD}${C_AZURE}" "$C_RESET"
+    printf ' %s│%s\n\n' "${C_DIM}${C_GRAY}" "$C_RESET"
 }
 
 ui::footer() {
-    printf '\n%s%53s%s\n' "$C_DIM" "$NODER_WATERMARK" "$C_RESET"
+    printf '\n %s%s%s\n' "${C_DIM}${C_GRAY}" "$NODER_WATERMARK" "$C_RESET"
+}
+
+# Цветная секция-разделитель внутри меню
+ui::section() {
+    local title="$1" width=50
+    local len=${#title}
+    local fill=$((width - len - 6))
+    [ "$fill" -lt 0 ] && fill=0
+    local dashes
+    dashes="$(printf '%*s' "$fill" '' | tr ' ' '─')"
+    printf '\n  %s──%s %s%s%s %s%s%s\n' \
+        "${C_DIM}${C_GRAY}" "$C_RESET" \
+        "${C_BOLD}${C_TEAL}" "$title" "$C_RESET" \
+        "${C_DIM}${C_GRAY}" "$dashes" "$C_RESET"
+}
+
+# Универсальный пункт меню — с цветовыми вариантами для категорий
+# Usage: ui::menu_item <N> "<text>" [tone]
+#   tone: ok | warn | danger | accent | dim (по умолчанию default = янтарный номер)
+ui::menu_item() {
+    local n="$1" text="$2" tone="${3:-}"
+    local num_color="${C_BOLD}${C_AMBER}"
+    local text_color=""
+    case "$tone" in
+        ok)      num_color="${C_BOLD}${C_LIME}" ;;
+        warn)    num_color="${C_BOLD}${C_YELLOW}" ;;
+        danger)  num_color="${C_BOLD}${C_ROSE}";  text_color="${C_DIM}" ;;
+        accent)  num_color="${C_BOLD}${C_PINK}" ;;
+        dim)     num_color="${C_DIM}${C_GRAY}";   text_color="${C_DIM}" ;;
+        back)    num_color="${C_DIM}${C_GRAY}";   text_color="${C_DIM}" ;;
+    esac
+    printf '  %s[%2s]%s  %s%s%s\n' "$num_color" "$n" "$C_RESET" "$text_color" "$text" "$C_RESET"
+}
+
+# Статусная строка вверху главного меню
+ui::status_line() {
+    local installed=""
+    if state::exists; then
+        local name; name="$(state::get node_name 2>/dev/null)"
+        installed="${C_LIME}●${C_RESET} ${C_BOLD}установлена${C_RESET} ${C_DIM}(${name})${C_RESET}"
+    else
+        installed="${C_AMBER}○${C_RESET} ${C_DIM}не установлена${C_RESET}"
+    fi
+
+    local extra=""
+    if state::exists; then
+        local mode port; mode="$(state::get mode 2>/dev/null)"; port="$(state::get reality.port 2>/dev/null)"
+        if [ -n "$mode" ] && [ "$mode" != "null" ]; then
+            extra="  ${C_DIM}·${C_RESET}  ${C_TEAL}${mode}${C_RESET}"
+            [ -n "$port" ] && [ "$port" != "null" ] && extra="$extra ${C_DIM}:${C_RESET}${C_BOLD}${port}${C_RESET}"
+        fi
+    fi
+
+    printf '  %s%s\n' "$installed" "$extra"
 }
 
 ui::pause() {
-    printf '\n%s%s%s ' "$C_DIM" "$(t ui.press_enter)" "$C_RESET"
+    printf '\n  %s%s%s ' "${C_DIM}${C_GRAY}" "$(t ui.press_enter)" "$C_RESET"
     read -r _ || true
 }
 
@@ -158,9 +245,15 @@ ui::prompt() {
     # ui::prompt <var> <text> [default]
     local __var="$1" __text="$2" __default="${3:-}" __input
     if [ -n "$__default" ]; then
-        printf '%s%s%s [%s]: ' "$C_BOLD" "$__text" "$C_RESET" "$__default"
+        printf '\n  %s❯%s %s%s%s %s[%s]:%s ' \
+            "${C_BOLD}${C_TEAL}" "$C_RESET" \
+            "${C_BOLD}" "$__text" "$C_RESET" \
+            "${C_DIM}" "$__default" "$C_RESET"
     else
-        printf '%s%s%s: ' "$C_BOLD" "$__text" "$C_RESET"
+        printf '\n  %s❯%s %s%s%s%s:%s ' \
+            "${C_BOLD}${C_TEAL}" "$C_RESET" \
+            "${C_BOLD}" "$__text" "$C_RESET" \
+            "${C_DIM}" "$C_RESET"
     fi
     read -r __input || __input=""
     # Strip CR (Windows-paste \r) and surrounding whitespace.
@@ -174,7 +267,10 @@ ui::prompt() {
 ui::prompt_secret() {
     # ui::prompt_secret <var> <text>
     local __var="$1" __text="$2" __input
-    printf '%s%s%s: ' "$C_BOLD" "$__text" "$C_RESET"
+    printf '\n  %s🔒%s %s%s%s%s:%s ' \
+        "${C_BOLD}${C_ROSE}" "$C_RESET" \
+        "${C_BOLD}" "$__text" "$C_RESET" \
+        "${C_DIM}" "$C_RESET"
     read -rs __input || __input=""
     echo
     __input="${__input//$'\r'/}"
@@ -184,7 +280,10 @@ ui::prompt_secret() {
 ui::confirm() {
     # Returns 0 for yes, 1 for no. Default no.
     local prompt="${1:-$(t ui.confirm)}" ans
-    printf '%s%s%s [y/N]: ' "$C_BOLD$C_YELLOW" "$prompt" "$C_RESET"
+    printf '\n  %s?%s %s%s%s %s[y/N]:%s ' \
+        "${C_BOLD}${C_AMBER}" "$C_RESET" \
+        "${C_BOLD}" "$prompt" "$C_RESET" \
+        "${C_DIM}" "$C_RESET"
     read -r ans || ans=""
     case "${ans,,}" in y|yes|д|да) return 0 ;; *) return 1 ;; esac
 }
