@@ -1029,12 +1029,6 @@ sudo apt-get purge -y --autoremove \
 
 ---
 
-## Лицензия
-
-MIT — см. файл [LICENSE](LICENSE).
-
----
-
 ## Поддержка
 
 - **Баги** — issues в этом репо
@@ -1051,5 +1045,7 @@ MIT — см. файл [LICENSE](LICENSE).
                                      by popokole
 ═══════════════════════════════════════════════
 ```
+
+[MIT](LICENSE) · © 2026 popokole
 
 </div>
