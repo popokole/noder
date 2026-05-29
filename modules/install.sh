@@ -286,11 +286,13 @@ install::__step_panel() {
     if ! install::__has panel_ip; then
         local h
         h="$(install::__get panel_host)"
-        if [[ "$h" =~ ^[0-9.]+$ ]]; then
+        if [[ "$h" =~ ^[0-9.]+$ ]] || [[ "$h" =~ : ]]; then
             install::__set panel_ip "$h"
         else
-            local resolved
-            resolved="$(getent ahostsv4 "$h" 2>/dev/null | awk '{print $1; exit}')"
+            local resolved=""
+            # NB: never let getent/awk failure (e.g. unresolved host) trip
+            # pipefail+set-e; keep the raw host as a fallback for nft.
+            resolved="$(getent ahostsv4 "$h" 2>/dev/null | awk '{print $1; exit}' || true)"
             install::__set panel_ip "${resolved:-$h}"
         fi
     fi

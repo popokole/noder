@@ -163,6 +163,10 @@ ui::prompt() {
         printf '%s%s%s: ' "$C_BOLD" "$__text" "$C_RESET"
     fi
     read -r __input || __input=""
+    # Strip CR (Windows-paste \r) and surrounding whitespace.
+    __input="${__input//$'\r'/}"
+    __input="${__input#"${__input%%[![:space:]]*}"}"
+    __input="${__input%"${__input##*[![:space:]]}"}"
     [ -z "$__input" ] && __input="$__default"
     printf -v "$__var" '%s' "$__input"
 }
@@ -173,6 +177,7 @@ ui::prompt_secret() {
     printf '%s%s%s: ' "$C_BOLD" "$__text" "$C_RESET"
     read -rs __input || __input=""
     echo
+    __input="${__input//$'\r'/}"
     printf -v "$__var" '%s' "$__input"
 }
 
