@@ -232,20 +232,21 @@ $node_rule_v6
     }
 
     # ------------------------------------------------------------------
-    # Forward — MSS clamp for any traffic we forward
+    # Forward — pure accept. MSS clamp was here but broke Reality
+    # handshakes for mobile RU clients (МТС / Beeline path MTU < 1500
+    # rendered xray's 1100+ byte TLS ClientHello unreadable → 'failed
+    # to read client hello'). Without the clamp the client and server
+    # negotiate their own MSS via standard MSS announcement in SYN.
     # ------------------------------------------------------------------
     chain forward {
         type filter hook forward priority filter; policy accept;
-        tcp flags syn / syn,rst tcp option maxseg size set rt mtu
     }
 
     # ------------------------------------------------------------------
-    # Output — also clamp MSS on TCP we originate (defends against
-    # PMTUD blackholes when xray makes upstream conns).
+    # Output — pure accept (same rationale).
     # ------------------------------------------------------------------
     chain output {
         type filter hook output priority filter; policy accept;
-        tcp flags syn / syn,rst tcp option maxseg size set rt mtu
     }
 }
 EOF
