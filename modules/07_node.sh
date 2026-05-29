@@ -23,9 +23,15 @@ readonly NODE_IMAGE_DEFAULT="remnawave/node:latest"
 #
 # Толерантен к разным форматам: с environment-списком, env_file, отступами.
 node::parse_compose_snippet() {
-    python3 - <<'PY'
-import json, re, sys
-text = sys.stdin.read()
+    # NB: `python3 - <<'PY'` would steal stdin for the python *script*, so a
+    # subsequent `sys.stdin.read()` would return empty. We read stdin into a
+    # bash var here and pass it via env so python can read the actual data.
+    local __input
+    __input="$(cat)"
+    NODER_COMPOSE_INPUT="$__input" python3 - <<'PY'
+import json, os, re
+
+text = os.environ.get("NODER_COMPOSE_INPUT", "")
 
 def find_env(name):
     # environment: list-style "- NAME=VALUE" or mapping "NAME: VALUE"

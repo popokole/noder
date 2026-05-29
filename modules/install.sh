@@ -326,9 +326,13 @@ install::__step_compose() {
     echo
     local first_line snippet=""
     read -r first_line || true
+    first_line="${first_line//$'\r'/}"
     if [ -n "$first_line" ]; then
         snippet="$first_line"$'\n'
-        while IFS= read -r line; do snippet+="$line"$'\n'; done
+        while IFS= read -r line; do
+            line="${line//$'\r'/}"
+            snippet+="$line"$'\n'
+        done
     fi
     if [ -n "$snippet" ]; then
         local parsed
