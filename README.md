@@ -16,7 +16,7 @@
 
 ---
 
-## TL;DR
+## установка
 
 ```bash
 bash <(curl -sL https://raw.githubusercontent.com/popokole/noder/main/install.sh)
