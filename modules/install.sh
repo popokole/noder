@@ -488,6 +488,14 @@ install::__execute() {
     firewall::run
     install::__commit firewall_apply
 
+    # 8a. Geo-файлы (geosite.dat + geoip.dat) ДО старта контейнера — иначе
+    # любое geoip:/geosite: правило в xray-конфиге валит SPAWN_ERROR.
+    log_info "Скачиваю geo-файлы для xray"
+    install -d -m 0755 /usr/local/share/xray
+    source "$NODER_HOME/modules/11_blocklists.sh"
+    blocklists::update_routing 2>/dev/null || \
+        log_warn "Не удалось скачать geo-файлы, попробуйте позже: sudo noder blocklists routing"
+
     # 8. Start container
     log_info "$(t install.node_start)"
     node::pull

@@ -107,6 +107,10 @@ services:
     environment:
       - NODE_PORT=$node_port
       - SECRET_KEY="$ssl_cert"
+      # Указываем xray где искать geoip.dat/geosite.dat — иначе он лезет
+      # в /usr/local/bin/ внутри контейнера, где их нет, и любое
+      # 'geoip:private' правило от панели валит запуск с SPAWN_ERROR.
+      - XRAY_LOCATION_ASSET=/usr/local/share/xray
     volumes:
       - /usr/local/share/xray:/usr/local/share/xray:ro
     logging:
