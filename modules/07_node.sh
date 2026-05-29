@@ -79,7 +79,14 @@ EOF
 }
 
 node::__render_compose() {
+    # Структура и порядок строк сделаны ровно как в compose, который выдаёт
+    # сама панель Remnawave (network_mode: host + cap_add NET_ADMIN + ulimits +
+    # environment с явным NODE_PORT и SECRET_KEY в двойных кавычках). Образ
+    # ноды требует именно эти ключи — env_file: .env он игнорирует.
     local image="${1:-$NODE_IMAGE_DEFAULT}"
+    local node_port="$2"
+    local ssl_cert="$3"
+    local hostname="${4:-$NODE_CONTAINER_NAME}"
     cat <<EOF
 # /opt/remnanode/docker-compose.yml — managed by noder
 # by popokole
@@ -87,11 +94,19 @@ node::__render_compose() {
 services:
   $NODE_CONTAINER_NAME:
     container_name: $NODE_CONTAINER_NAME
-    hostname: $(state::get node_name 2>/dev/null || echo node)
+    hostname: $hostname
     image: $image
-    restart: always
     network_mode: host
-    env_file: .env
+    restart: always
+    cap_add:
+      - NET_ADMIN
+    ulimits:
+      nofile:
+        soft: 1048576
+        hard: 1048576
+    environment:
+      - NODE_PORT=$node_port
+      - SECRET_KEY="$ssl_cert"
     volumes:
       - /usr/local/share/xray:/usr/local/share/xray:ro
     logging:
@@ -99,11 +114,6 @@ services:
       options:
         max-size: "50m"
         max-file: "3"
-    healthcheck:
-      test: ["CMD-SHELL", "pgrep -f xray || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
 EOF
 }
 
@@ -113,19 +123,30 @@ node::write_files() {
     local node_port="$1" ssl_cert="$2" image="${3:-$NODE_IMAGE_DEFAULT}"
     [ -z "$node_port" ] || [ -z "$ssl_cert" ] && die "node::write_files требует node_port и ssl_cert"
 
+    # Резолвим hostname так, чтобы он гарантированно был непустой YAML-строкой
+    local hostname
+    hostname="$(state::get node_name 2>/dev/null)"
+    if [ -z "$hostname" ] || [ "$hostname" = "null" ]; then
+        hostname="$NODE_CONTAINER_NAME"
+    fi
+
     install -d -m 0750 "$NODE_DIR"
     install -d -m 0750 /usr/local/share/xray
 
     backup_file "$NODE_ENV_FILE"
     backup_file "$NODE_COMPOSE_FILE"
 
+    # .env держим для отладки и любых внешних утилит (sourceable формат),
+    # хотя сам контейнер теперь получает env через compose `environment:`.
     node::__render_env "$node_port" "$ssl_cert" > "$NODE_ENV_FILE"
     chmod 0600 "$NODE_ENV_FILE"
 
-    node::__render_compose "$image" > "$NODE_COMPOSE_FILE"
+    node::__render_compose "$image" "$node_port" "$ssl_cert" "$hostname" > "$NODE_COMPOSE_FILE"
     chmod 0640 "$NODE_COMPOSE_FILE"
 
-    log_ok "compose и .env записаны в $NODE_DIR"
+    log_ok "compose записан: $NODE_COMPOSE_FILE"
+    log_ok ".env записан:    $NODE_ENV_FILE"
+    log_info "Просмотр: cat $NODE_COMPOSE_FILE"
 }
 
 # ---------------------------------------------------------------------------
