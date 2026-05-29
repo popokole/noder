@@ -1,0 +1,38 @@
+{
+  "_meta": {
+    "version": 1,
+    "updated": "2026-05-28",
+    "rules": "Только крупные международные ресурсы с TLS 1.3 + HTTP/2, не заблокированные в РФ, географически нейтральные. Никаких российских сайтов и сайтов из реестра блокировок РКН."
+  },
+  "masks": [
+    { "domain": "www.microsoft.com",      "server_names": ["www.microsoft.com"],      "region": "global", "notes": "high uptime, US/EU edges" },
+    { "domain": "www.apple.com",          "server_names": ["www.apple.com"],          "region": "global", "notes": "high uptime, CDN" },
+    { "domain": "www.cloudflare.com",     "server_names": ["www.cloudflare.com"],     "region": "global", "notes": "TLS 1.3 + HTTP/2 guaranteed" },
+    { "domain": "github.com",             "server_names": ["github.com"],             "region": "global", "notes": "popular, low suspicion" },
+    { "domain": "aws.amazon.com",         "server_names": ["aws.amazon.com"],         "region": "global", "notes": "Amazon CloudFront" },
+    { "domain": "developer.mozilla.org",  "server_names": ["developer.mozilla.org"],  "region": "global", "notes": "stable, popular" },
+    { "domain": "www.nvidia.com",         "server_names": ["www.nvidia.com"],         "region": "global", "notes": "high traffic, stable" },
+    { "domain": "www.intel.com",          "server_names": ["www.intel.com"],          "region": "global", "notes": "high traffic, stable" },
+    { "domain": "www.python.org",         "server_names": ["www.python.org"],         "region": "global", "notes": "stable" },
+    { "domain": "www.kernel.org",         "server_names": ["www.kernel.org"],         "region": "global", "notes": "stable, popular" },
+    { "domain": "nginx.org",              "server_names": ["nginx.org"],              "region": "global", "notes": "stable" },
+    { "domain": "www.docker.com",         "server_names": ["www.docker.com"],         "region": "global", "notes": "stable" },
+    { "domain": "www.swift.com",          "server_names": ["www.swift.com"],          "region": "global", "notes": "stable, finance-tier" },
+    { "domain": "one.one.one.one",        "server_names": ["one.one.one.one"],        "region": "global", "notes": "Cloudflare 1.1.1.1 portal" },
+    { "domain": "www.lovelive-anime.jp",  "server_names": ["www.lovelive-anime.jp"],  "region": "asia",   "notes": "asia-edge alternative" }
+  ],
+  "forbidden_substrings": [
+    "vk.com",
+    "vkontakte",
+    "gosuslugi",
+    "sberbank",
+    "ozon",
+    "wildberries",
+    "yandex",
+    "mail.ru",
+    "rambler",
+    "kaspersky",
+    "tinkoff",
+    "alfabank"
+  ]
+}

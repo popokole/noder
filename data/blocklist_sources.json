@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "version": 1,
+    "purpose": "Источники гео-списков по умолчанию. Пользователь может переопределить через меню."
+  },
+  "routing": {
+    "geosite_url": "https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat",
+    "geoip_url": "https://github.com/v2fly/geoip/releases/latest/download/geoip.dat",
+    "ru_bypass_url": "https://antifilter.network/download/ipsum.lst"
+  },
+  "firewall": {
+    "blocklist_url": "https://iplists.firehol.org/files/firehol_level1.netset"
+  }
+}

@@ -1,0 +1,19 @@
+*.swp
+*.bak
+*.tmp
+*~
+.DS_Store
+
+# Local runtime artefacts (state, logs, backups, secrets) — never commit
+state.json
+*.env
+.env
+.salt
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Editor / OS junk
+.idea/
+.vscode/
