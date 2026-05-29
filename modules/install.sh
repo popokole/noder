@@ -93,6 +93,7 @@ install::__parse_args() {
             --node-port)    install::__set node_port "$2"; shift ;;
             --secret)       install::__set ssl_cert "$2"; shift ;;
             --compose)      install::__set compose_snippet "$2"; shift ;;
+            --compose-file) install::__set compose_file "$2"; shift ;;
             --tg-token)     install::__set tg_token "$2"; shift ;;
             --tg-chat)      install::__set tg_chat "$2"; shift ;;
             --panel-url)    install::__set api_url "$2"; shift ;;
@@ -300,6 +301,18 @@ install::__step_panel() {
 
 install::__step_compose() {
     install::__has node_port && install::__has ssl_cert && return 0
+
+    # --compose-file PATH: читаем compose из файла на сервере. Удобно когда
+    # многокилобайтная вставка SECRET_KEY роняет SSH-сессию через NAT/IDS.
+    if install::__has compose_file; then
+        local cf; cf="$(install::__get compose_file)"
+        if [ -r "$cf" ]; then
+            install::__set compose_snippet "$(cat "$cf")"
+            log_ok "compose прочитан из $cf"
+        else
+            log_warn "Файл compose не читается: $cf"
+        fi
+    fi
 
     if install::__has compose_snippet; then
         local parsed
