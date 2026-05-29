@@ -63,12 +63,18 @@ PY
 # ---------------------------------------------------------------------------
 
 node::__render_env() {
+    # Remnawave node-image варианты именования за разные версии расходятся:
+    # одна линейка читает APP_PORT / SSL_CERT, другая — NODE_PORT / SECRET_KEY
+    # (именно эти имена выдаёт панель в своём compose). Пишем оба алиаса —
+    # образ возьмёт то, что понимает; неиспользуемое просто игнорируется.
     local node_port="$1" ssl_cert="$2"
     cat <<EOF
 # /opt/remnanode/.env — managed by noder
 # by popokole
 APP_PORT=$node_port
+NODE_PORT=$node_port
 SSL_CERT=$ssl_cert
+SECRET_KEY=$ssl_cert
 EOF
 }
 
